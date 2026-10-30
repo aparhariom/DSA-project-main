@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Analytics | SmartExam</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text-dark); min-height: 100vh; }
+
+        /* Top Navbar */
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 14px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .nav-brand { font-size: 20px; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .nav-brand span { color: var(--text-dark); }
+        .nav-links { display: flex; align-items: center; gap: 20px; }
+        .nav-link { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; }
+        .nav-link.active { color: var(--primary); font-weight: 600; }
+
+        .container { max-width: 1100px; margin: 36px auto; padding: 0 24px; }
+        .header-title { margin-bottom: 28px; }
+        .header-title h1 { font-size: 26px; font-weight: 800; }
+        .header-title p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+        /* 4 Key Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .stat-value { font-size: 30px; font-weight: 800; margin-top: 6px; }
+
+        .stat-card.blue .stat-value { color: var(--primary); }
+        .stat-card.green .stat-value { color: var(--success); }
+        .stat-card.purple .stat-value { color: var(--purple); }
+        .stat-card.amber .stat-value { color: var(--warning); }
+
+        /* Table Card */
+        .table-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 { font-size: 18px; font-weight: 700; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #f8fafc; padding: 14px 20px; font-size: 13px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+        td { padding: 16px 20px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .badge.passed { background: #dcfce7; color: #166534; }
+        .badge.failed { background: #fee2e2; color: #991b1b; }
+
+        .strike-pill { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .strike-clean { background: #eff6ff; color: var(--primary); }
+        .strike-warn { background: #fee2e2; color: #b91c1c; }
+
+        .btn-action {
+            background: #f1f5f9;
+            color: var(--text-dark);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-action:hover { background: #e2e8f0; }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-muted);
+        }
+        .btn-take-test {
+            display: inline-block;
+            margin-top: 14px;
+            background: var(--primary);
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        @media (max-width: 860px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .navbar { padding: 14px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="dashboard.html" class="nav-brand">Smart<span>Exam</span></a>
+        <div class="nav-links">
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <a href="performance.html" class="nav-link active">Performance</a>
+            <button onclick="SmartStore.logoutStudent()" style="background:#fee2e2; color:#ef4444; border:none; padding:6px 12px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-title">
+            <h1 id="greeting">Performance & Test History</h1>
+            <p>Track your test scores, subject accuracy, and percentile rankings.</p>
+        </div>
+
+        <!-- 4 Real-time Metrics -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-label">Total Exams Taken</div>
+                <div class="stat-value" id="totalExamsStat">0</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-label">Average Score</div>
+                <div class="stat-value" id="avgScoreStat">0%</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-label">Best Score</div>
+                <div class="stat-value" id="bestScoreStat">0%</div>
+            </div>
+            <div class="stat-card amber">
+                <div class="stat-label">Merit Rank</div>
+                <div class="stat-value" id="rankStat">#1</div>
+            </div>
+        </div>
+
+        <!-- Detailed History Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h2>Examination History & Attempts</h2>
+                <span style="font-size: 13px; color: var(--text-muted);">Real-time Record Log</span>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Examination Title</th>
+                        <th>Subject</th>
+                        <th>Marks Obtained</th>
+                        <th>Percentage</th>
+                        <th>Status</th>
+                        <th>Integrity</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Store Script -->
+    <script src="../js/store.js"></script>
+
+    <script>
+        "use strict";
+
+        const currentStudent = SmartStore.getCurrentStudent();
+        document.getElementById("greeting").textContent = `${currentStudent.name}'s Performance Analytics`;
+
+        const studentResults = SmartStore.getStudentResults(currentStudent.email);
+        const allResults = SmartStore.getResults();
+
+        // 1. Calculate Real Statistics
+        const totalExams = studentResults.length;
+        document.getElementById("totalExamsStat").textContent = totalExams;
+
+        if (totalExams > 0) {
+            const sumPercentages = studentResults.reduce((acc, r) => acc + (r.percentage || 0), 0);
+            const avgPercentage = Math.round(sumPercentages / totalExams);
+            const bestPercentage = Math.max(...studentResults.map(r => r.percentage || 0));
+
+            document.getElementById("avgScoreStat").textContent = `${avgPercentage}%`;
+            document.getElementById("bestScoreStat").textContent = `${bestPercentage}%`;
+
+            // Calculate student rank across all attempts using QuickSort
+            const sortedLeaderboard = SmartStore.quickSort(allResults, "score", true);
+            const userHighestScore = Math.max(...studentResults.map(r => r.score || 0));
+            const rankIndex = sortedLeaderboard.findIndex(r => (r.studentEmail || "").toLowerCase() === currentStudent.email.toLowerCase() && r.score === userHighestScore);
+            const rank = rankIndex !== -1 ? rankIndex + 1 : 1;
+            document.getElementById("rankStat").textContent = `#${rank}`;
+        } else {
+            document.getElementById("avgScoreStat").textContent = "0%";
+            document.getElementById("bestScoreStat").textContent = "0%";
+            document.getElementById("rankStat").textContent = "-";
+        }
+
+        // 2. Render History Table
+        const tbody = document.getElementById("historyTableBody");
+        tbody.innerHTML = "";
+
+        if (studentResults.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <p>You haven't attempted any examinations yet.</p>
+                            <a href="dashboard.html" class="btn-take-test">Start a Test Now →</a>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        } else {
+            studentResults.forEach(res => {
+                const passed = res.status === "Passed" || res.percentage >= 40;
+                const strikes = res.proctorStrikes || 0;
+                const integrityTag = strikes === 0
+                    ? `<span class="strike-pill strike-clean">✓ Verified</span>`
+                    : `<span class="strike-pill strike-warn">⚠️ ${strikes} Strikes</span>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${SmartStore.escapeHTML(res.examTitle)}</strong></td>
+                        <td>${SmartStore.escapeHTML(res.subject || 'General')}</td>
+                        <td>${res.score} / ${res.totalMarks}</td>
+                        <td><strong>${res.percentage}%</strong></td>
+                        <td><span class="badge ${passed ? 'passed' : 'failed'}">${passed ? 'PASSED' : 'FAILED'}</span></td>
+                        <td>${integrityTag}</td>
+                        <td>${res.dateFormatted || 'Recently'}</td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

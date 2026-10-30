@@ -1,0 +1,13 @@
+{
+  "name": "smartexam-server",
+  "version": "1.0.0",
+  "description": "SmartExam Online Examination System Backend REST API & Static Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["online-examination", "proctoring", "dsa", "rest-api"],
+  "author": "SmartExam Team",
+  "license": "MIT"
+}

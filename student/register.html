@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration | SmartExam</title>
+    <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-logo">
+            Smart<span>Exam</span>
+        </div>
+
+        <h2>Create Student Account</h2>
+        <p class="auth-subtitle">
+            Register to start taking online assessments
+        </p>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="registerEmail">Email Address</label>
+                <input type="email" id="registerEmail" placeholder="Enter email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="registerPassword">Password</label>
+                <input type="password" id="registerPassword" placeholder="Create password (min 6 chars)" minlength="6" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+            </div>
+
+            <button type="submit" class="auth-btn">Create Account →</button>
+        </form>
+
+        <p class="register-link" style="margin-top: 15px;">
+            Already have an account? <a href="login.html">Login</a>
+        </p>
+        <p class="back-home" style="margin-top: 8px;">
+            <a href="../index.html">← Back to Home</a>
+        </p>
+    </div>
+</div>
+
+<!-- Store Script -->
+<script src="../js/store.js"></script>
+
+<script>
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("registerEmail").value.trim();
+        const password = document.getElementById("registerPassword").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match. Please try again.");
+            return;
+        }
+
+        const res = SmartStore.registerStudent(name, email, password);
+        if (res.success) {
+            alert("Registration successful! Welcome to SmartExam.");
+            window.location.href = "login.html";
+        } else {
+            alert(res.message);
+        }
+    });
+</script>
+</body>
+</html>

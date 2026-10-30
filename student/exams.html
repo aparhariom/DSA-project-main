@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Examinations | SmartExam</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .badge-status-pill {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        .badge-active { background: #dcfce7; color: #166534; }
+        .badge-expired { background: #fee2e2; color: #991b1b; }
+        .btn-disabled {
+            background: #cbd5e1 !important;
+            color: #64748b !important;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<header class="dashboard-header">
+    <div class="logo">
+        Smart<span>Exam</span>
+    </div>
+    <a href="dashboard.html" style="text-decoration:none; color: #475569; font-weight: 600;">
+        ← Back to Dashboard
+    </a>
+</header>
+
+<main class="dashboard">
+    <div class="welcome">
+        <h1>Available Scheduled Examinations</h1>
+        <p>Select an ongoing or scheduled examination paper to start. Check deadlines carefully.</p>
+    </div>
+
+    <div id="examContainer" class="dashboard-grid"></div>
+</main>
+
+<!-- Store Script -->
+<script src="../js/store.js"></script>
+
+<script>
+    const container = document.getElementById("examContainer");
+    const exams = SmartStore.getExams();
+
+    if (exams.length === 0) {
+        container.innerHTML = `<p style="color:#64748b; padding:20px;">No scheduled examinations available at the moment.</p>`;
+    } else {
+        exams.forEach(exam => {
+            const isExpired = SmartStore.isExamExpired(exam);
+            const isClosed = exam.status === "Closed";
+            const canAttempt = !isExpired && !isClosed;
+
+            const card = document.createElement("div");
+            card.className = "dashboard-card";
+            card.innerHTML = `
+                <div>
+                    <span class="badge-status-pill ${canAttempt ? 'badge-active' : 'badge-expired'}">
+                        ${canAttempt ? '🟢 ACTIVE' : (isExpired ? '⏳ DEADLINE EXPIRED' : '🔴 CLOSED')}
+                    </span>
+                    <h2>${SmartStore.escapeHTML(exam.title)}</h2>
+                </div>
+                <p><strong>Subject:</strong> ${SmartStore.escapeHTML(exam.subject)}</p>
+                <p><strong>Questions:</strong> ${exam.questions || 15} Qs</p>
+                <p><strong>Duration:</strong> ${exam.duration || (exam.durationMinutes + ' mins')}</p>
+                <p><strong>Deadline:</strong> 📅 ${SmartStore.formatDateTime(exam.deadline)}</p>
+                <p><strong>Passing Score:</strong> ${exam.passPercent || 40}%</p>
+                <a href="instructions.html?subject=${encodeURIComponent(exam.subject)}&title=${encodeURIComponent(exam.title)}" 
+                   class="dashboard-btn ${canAttempt ? '' : 'btn-disabled'}" 
+                   style="margin-top:14px; display:inline-block;">
+                    ${canAttempt ? 'Start Examination →' : 'Examination Closed'}
+                </a>
+            `;
+            container.appendChild(card);
+        });
+    }
+</script>
+
+</body>
+</html>

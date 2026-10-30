@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Examination with WebRTC AI Proctoring | SmartExam</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Proctoring Nav */
+        .exam-nav {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .exam-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .proctor-hud {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .proctor-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .strike-badge {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .strike-badge.danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+
+        .timer-box {
+            background: #fee2e2;
+            color: #ef4444;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid #fca5a5;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Layout Grid */
+        .exam-container {
+            max-width: 1180px;
+            margin: 28px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 310px;
+            gap: 24px;
+        }
+
+        .question-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .q-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 12px;
+        }
+
+        .q-tag {
+            background: #eff6ff;
+            color: var(--primary);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .q-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+            line-height: 1.55;
+            margin-bottom: 24px;
+        }
+
+        /* Options */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-item {
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary);
+            background: #f8fafc;
+            transform: translateX(2px);
+        }
+
+        .option-item.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+            font-weight: 600;
+            color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .opt-letter {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: #475569;
+            flex-shrink: 0;
+        }
+
+        .option-item.selected .opt-letter {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        /* Action Buttons */
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-group-left {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-purple {
+            background: #f5f3ff;
+            color: var(--purple);
+            border-color: #ddd6fe;
+        }
+
+        .btn-purple.active-mark {
+            background: var(--purple);
+            color: #ffffff;
+            border-color: var(--purple);
+        }
+
+        .btn-submit {
+            background: var(--success);
+            color: #ffffff;
+            border: none;
+            padding: 10px 22px;
+        }
+
+        .btn-submit:hover {
+            background: #059669;
+        }
+
+        /* Sidebar & Live WebRTC Camera Box */
+        .sidebar-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .proctor-camera-card {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 14px;
+            color: #ffffff;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+
+        .cam-video-box {
+            width: 100%;
+            height: 150px;
+            background: #1e293b;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #334155;
+        }
+
+        #proctorWebcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror view for candidate natural feel */
+        }
+
+        #proctorOverlayCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .cam-fallback {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 12px;
+            gap: 6px;
+        }
+
+        .cam-rec-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(239, 68, 68, 0.85);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(4px);
+            z-index: 6;
+        }
+
+        .face-status-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(15, 23, 42, 0.85);
+            color: #4ade80;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .face-status-badge.multi {
+            background: rgba(220, 38, 38, 0.95);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+            animation: pulse-red 1s infinite alternate;
+        }
+
+        .face-status-badge.none {
+            background: rgba(217, 119, 6, 0.9);
+            color: #ffffff;
+        }
+
+        @keyframes pulse-red {
+            from { transform: scale(1); }
+            to { transform: scale(1.04); }
+        }
+
+        .snapshot-counter {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(15, 23, 42, 0.75);
+            color: #38bdf8;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 6;
+        }
+
+        .multi-person-alert-banner {
+            display: none;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2);
+            animation: slideDown 0.25s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cam-status {
+            font-size: 11px;
+            color: #4ade80;
+            font-weight: 600;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* Palette Card */
+        .palette-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .palette-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 18px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .palette-btn {
+            height: 38px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.15s;
+        }
+
+        .palette-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .palette-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .palette-btn.answered {
+            background: var(--success);
+            color: #ffffff;
+            border-color: var(--success);
+        }
+
+        .palette-btn.marked {
+            background: var(--purple);
+            color: #ffffff;
+            border-color: var(--purple);
+        }
+
+        .palette-legend {
+            border-top: 1px solid var(--border);
+            padding-top: 14px;
+            font-size: 12px;
+            color: var(--text-muted);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        /* Anti-Cheat Violation Modal */
+        .violation-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .violation-modal {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: popIn 0.25s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .violation-icon {
+            width: 64px;
+            height: 64px;
+            background: #fee2e2;
+            color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 16px;
+        }
+
+        .violation-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #991b1b;
+            margin-bottom: 8px;
+        }
+
+        .violation-msg {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .strike-pill-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+
+        .strike-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #e2e8f0;
+        }
+
+        .strike-dot.active {
+            background: #ef4444;
+        }
+
+        .btn-resume {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        @media (max-width: 860px) {
+            .exam-container { grid-template-columns: 1fr; }
+            .exam-nav { padding: 12px 16px; }
+            .proctor-badge span { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation with Live Proctor HUD -->
+    <div class="exam-nav">
+        <div class="exam-brand">
+            <div class="brand-title" id="topExamTitle">SmartExam &bull; Live Examination</div>
+            <div class="brand-subtitle" id="candidateDisplay">Candidate: Loading...</div>
+        </div>
+
+        <div class="proctor-hud">
+            <div class="proctor-badge">
+                <span class="pulse-dot"></span>
+                <span>Proctoring Active</span>
+            </div>
+            <div class="strike-badge" id="strikeBadge">Strikes: 0 / 3</div>
+            <div class="timer-box" id="timerDisplay">⏱ 15:00</div>
+        </div>
+    </div>
+
+    <!-- Examination Container -->
+    <div class="exam-container">
+        <!-- Question Active Area -->
+        <div class="question-card" id="questionArea">
+            <!-- Multiple Person Camera Alert Banner -->
+            <div class="multi-person-alert-banner" id="multiPersonAlertBanner">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:24px;">🚨</span>
+                    <div>
+                        <strong style="font-size:14px; display:block;">Warning: Multiple Persons Detected in Camera View!</strong>
+                        <span style="font-size:12px; opacity:0.95;">Only ONE candidate is allowed during the exam. Continued presence of multiple people will trigger a proctoring violation.</span>
+                    </div>
+                </div>
+                <span class="badge" style="background:#ffffff; color:#dc2626; font-weight:800; padding:4px 10px; border-radius:6px; font-size:11px;" id="multiPersonCountTag">2 Persons Detected</span>
+            </div>
+
+            <div class="q-meta">
+                <span id="questionNumber">Question 1 of 5</span>
+                <span class="q-tag" id="questionSubject">DSA &bull; 2 Marks</span>
+            </div>
+
+            <div class="q-text" id="questionText">Loading examination question...</div>
+            <div class="options-list" id="optionsContainer"></div>
+
+            <div class="btn-row">
+                <div class="btn-group-left">
+                    <button class="btn" id="prevBtn" onclick="navigate(-1)">← Previous</button>
+                    <button class="btn btn-purple" id="markReviewBtn" onclick="toggleMarkReview()">⚑ Mark for Review</button>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+                    <button class="btn btn-submit" id="submitBtn" onclick="submitExam(false)">Submit Examination</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Palette & Live WebRTC Video Feed -->
+        <div class="sidebar-wrapper">
+            <div class="proctor-camera-card">
+                <div class="cam-video-box">
+                    <video id="proctorWebcam" autoplay playsinline muted></video>
+                    <canvas id="proctorOverlayCanvas" width="320" height="240"></canvas>
+                    <div id="camFallback" class="cam-fallback" style="display:none;">
+                        <div style="font-size: 26px;">👤</div>
+                        <span>Webcam Standby Mode</span>
+                    </div>
+                    <div class="cam-rec-badge">🔴 REC &bull; WebRTC Live</div>
+                    <div class="face-status-badge" id="faceStatusBadge">👥 Analyzing...</div>
+                    <div class="snapshot-counter" id="snapshotCounter">🛡️ 0 Violations</div>
+                </div>
+                <div class="cam-status">
+                    <span class="pulse-dot" style="background:#4ade80; width:6px; height:6px;"></span>
+                    <span id="camStatusText">Connecting Camera Stream...</span>
+                </div>
+            </div>
+
+            <!-- Hidden canvas for capturing proctoring snapshots -->
+            <canvas id="snapshotCanvas" width="320" height="240" style="display:none;"></canvas>
+
+            <div class="palette-card">
+                <div class="palette-title">
+                    <span>Question Palette</span>
+                    <span style="font-size: 12px; color: var(--text-muted);" id="answeredCountBadge">0 Answered</span>
+                </div>
+                <div class="palette-grid" id="paletteGrid"></div>
+
+                <div class="palette-legend">
+                    <div class="legend-item"><span class="legend-dot" style="background:var(--success);"></span> Answered</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:var(--purple);"></span> Review</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:var(--primary);"></span> Current</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#e2e8f0;"></span> Unvisited</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Violation Strike Warning Modal -->
+    <div class="violation-modal-overlay" id="violationModal">
+        <div class="violation-modal">
+            <div class="violation-icon">⚠️</div>
+            <div class="violation-title" id="violationTitle">Proctoring Warning</div>
+            <p class="violation-msg" id="violationMsg">
+                Tab switching or window minimization was detected. Leaving the examination screen violates test integrity policies.
+            </p>
+
+            <div class="strike-pill-container">
+                <div class="strike-dot" id="dot1"></div>
+                <div class="strike-dot" id="dot2"></div>
+                <div class="strike-dot" id="dot3"></div>
+            </div>
+
+            <button class="btn-resume" id="resumeExamBtn" onclick="dismissViolation()">Return to Exam</button>
+        </div>
+    </div>
+
+    <!-- Neural Face Detection Model (Google BlazeFace) & Proctor AI -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+    <script src="../js/store.js"></script>
+    <script src="../js/proctor-ai.js"></script>
+
+    <!-- Proctoring and Exam Controller -->
+    <script>
+        "use strict";
+
+        // URL Parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentSubject = urlParams.get("subject") || "All";
+        const currentTitle = urlParams.get("title") || `${currentSubject} Examination`;
+
+        // Student Session
+        const currentStudent = SmartStore.getCurrentStudent();
+        document.getElementById("topExamTitle").textContent = currentTitle;
+        document.getElementById("candidateDisplay").textContent = `Candidate: ${currentStudent.name}`;
+
+        // Verify Exam Expiration before start
+        const scheduledExams = SmartStore.getExams();
+        const matchedExam = scheduledExams.find(e => e.title.toLowerCase() === currentTitle.toLowerCase() || (e.subject || "").toLowerCase() === currentSubject.toLowerCase());
+        if (matchedExam && SmartStore.isExamExpired(matchedExam)) {
+            alert(`This examination has passed its deadline (${SmartStore.formatDateTime(matchedExam.deadline)}) and is closed.`);
+            window.location.href = "dashboard.html";
+        }
+
+        // Questions Pool from Unified Store
+        let allQuestions = SmartStore.getQuestions(currentSubject);
+        if (!allQuestions || allQuestions.length === 0) {
+            allQuestions = SmartStore.getQuestions("All");
+        }
+
+        // State variables
+        let currentIndex = 0;
+        let userAnswers = {};        // { 0: "B", 1: "A" }
+        let markedForReview = {};    // { 0: true }
+        let proctorStrikes = 0;
+        const MAX_STRIKES = 3;
+        let isExamSubmitted = false;
+
+        // WebRTC & Snapshot State
+        let webcamStream = null;
+        const proctorSnapshots = [];
+        const proctorViolations = [];
+
+        // =========================================================
+        // 1. WEBRTC WEBCAM PROCTORING INITIALIZATION & AI MONITOR
+        // =========================================================
+        let faceMonitoringInterval = null;
+        let multiPersonStreak = 0;
+        let lastMultiPersonWarningTime = 0;
+        let multiPersonWarningCount = 0;
+        let isLastViolationMultiPerson = false;
+
+        async function initWebcam() {
+            const video = document.getElementById("proctorWebcam");
+            const fallback = document.getElementById("camFallback");
+            const statusText = document.getElementById("camStatusText");
+
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    webcamStream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 320, height: 240, facingMode: "user" },
+                        audio: false
+                    });
+                    video.srcObject = webcamStream;
+                    video.style.display = "block";
+                    fallback.style.display = "none";
+                    statusText.textContent = "WebRTC Stream Verified • Live";
+
+                    video.onloadedmetadata = () => {
+                        video.play().catch(e => console.warn("Video play error:", e));
+                        startFaceMonitoring();
+                    };
+                    // Fallback timer trigger
+                    setTimeout(startFaceMonitoring, 1200);
+                } catch (err) {
+                    console.warn("Webcam permission denied or device not found:", err);
+                    video.style.display = "none";
+                    fallback.style.display = "flex";
+                    statusText.textContent = "Camera Standby (Fallback Mode)";
+                }
+            } else {
+                video.style.display = "none";
+                fallback.style.display = "flex";
+                statusText.textContent = "Webcam API Not Supported";
+            }
+        }
+
+        // Real-Time Multi-Person Face Monitoring Loop
+        function startFaceMonitoring() {
+            if (faceMonitoringInterval) clearInterval(faceMonitoringInterval);
+
+            const video = document.getElementById("proctorWebcam");
+            const overlayCanvas = document.getElementById("proctorOverlayCanvas");
+            const faceBadge = document.getElementById("faceStatusBadge");
+            const alertBanner = document.getElementById("multiPersonAlertBanner");
+            const countTag = document.getElementById("multiPersonCountTag");
+
+            faceMonitoringInterval = setInterval(async () => {
+                if (isExamSubmitted || !webcamStream || !video || video.paused || video.ended) {
+                    return;
+                }
+
+                try {
+                    const faces = await ProctorAI.detectFaces(video);
+
+                    if (overlayCanvas) {
+                        ProctorAI.drawFaceOverlays(overlayCanvas, faces, video);
+                    }
+
+                    const count = faces.length;
+
+                    if (count > 1) {
+                        // MULTIPLE PERSONS DETECTED: Require 3 consecutive cycles to confirm sustained presence
+                        multiPersonStreak++;
+
+                        if (multiPersonStreak >= 3) {
+                            if (faceBadge) {
+                                faceBadge.className = "face-status-badge multi";
+                                faceBadge.textContent = `🚨 ${count} Persons Detected!`;
+                            }
+                            if (alertBanner) {
+                                alertBanner.style.display = "flex";
+                            }
+                            if (countTag) {
+                                countTag.textContent = `${count} Persons Detected`;
+                            }
+
+                            // Trigger warning snapshot & warning modal on confirmed detection (never auto-submits)
+                            const now = Date.now();
+                            if (now - lastMultiPersonWarningTime > 10000) {
+                                lastMultiPersonWarningTime = now;
+                                showMultiPersonWarning(count);
+                            }
+                        }
+                    } else if (count === 1) {
+                        // Exactly 1 Candidate (Ideal Verified State)
+                        multiPersonStreak = 0;
+
+                        if (faceBadge) {
+                            faceBadge.className = "face-status-badge";
+                            faceBadge.textContent = `🟢 1 Candidate Verified`;
+                        }
+                        if (alertBanner) {
+                            alertBanner.style.display = "none";
+                        }
+                    } else {
+                        // 0 Faces Detected
+                        multiPersonStreak = 0;
+
+                        if (faceBadge) {
+                            faceBadge.className = "face-status-badge none";
+                            faceBadge.textContent = `⚠️ No Face Detected`;
+                        }
+                        if (alertBanner) {
+                            alertBanner.style.display = "none";
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Face detection cycle error:", err);
+                }
+            }, 1500);
+        }
+
+        // Developer / Testing Helper: Simulate multiple persons detection
+        window.simulateMultiplePersons = function (count = 2) {
+            const video = document.getElementById("proctorWebcam");
+            const overlay = document.getElementById("proctorOverlayCanvas");
+            const fakeFaces = [
+                { x: 30, y: 35, width: 95, height: 115, confidence: 0.96 },
+                { x: 175, y: 40, width: 90, height: 110, confidence: 0.94 }
+            ];
+            if (overlay && video) {
+                ProctorAI.drawFaceOverlays(overlay, fakeFaces, video);
+            }
+            const faceBadge = document.getElementById("faceStatusBadge");
+            const alertBanner = document.getElementById("multiPersonAlertBanner");
+            const countTag = document.getElementById("multiPersonCountTag");
+            if (faceBadge) {
+                faceBadge.className = "face-status-badge multi";
+                faceBadge.textContent = `🚨 ${count} Persons Detected!`;
+            }
+            if (alertBanner) alertBanner.style.display = "flex";
+            if (countTag) countTag.textContent = `${count} Persons Detected`;
+            showMultiPersonWarning(count, `Multiple persons (${count}) detected in camera view. Only 1 candidate is allowed during the exam.`);
+        };
+
+        // Capture Violation Snapshot Helper
+        function captureSnapshot(label, type = "violation") {
+            const canvas = document.getElementById("snapshotCanvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            const video = document.getElementById("proctorWebcam");
+
+            if (webcamStream && video && video.videoWidth > 0) {
+                ctx.save();
+                // Mirror image so snapshot matches candidate perspective
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+
+                // Draw overlay boxes (e.g. multi-person tags) on snapshot
+                const overlay = document.getElementById("proctorOverlayCanvas");
+                if (overlay) {
+                    ctx.drawImage(overlay, 0, 0, canvas.width, canvas.height);
+                }
+            } else {
+                // High-quality simulated violation frame
+                ctx.fillStyle = "#450a0a";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#ef4444";
+                ctx.font = "bold 16px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("👤 " + (currentStudent.name || "Candidate"), canvas.width / 2, 90);
+                ctx.fillStyle = "#fca5a5";
+                ctx.font = "12px sans-serif";
+                ctx.fillText(label, canvas.width / 2, 120);
+                ctx.fillText(new Date().toLocaleTimeString(), canvas.width / 2, 140);
+            }
+
+            // Watermark overlay bar
+            ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+            ctx.fillRect(0, canvas.height - 24, canvas.width, 24);
+            ctx.fillStyle = "#f87171";
+            ctx.font = "bold 10px sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText(`⚠️ ${new Date().toLocaleTimeString()} | ${label}`, 8, canvas.height - 8);
+
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+            proctorSnapshots.push({
+                timestamp: new Date().toLocaleTimeString(),
+                label: label,
+                type: "violation",
+                image: dataUrl
+            });
+
+            const counter = document.getElementById("snapshotCounter");
+            if (counter) counter.textContent = `⚠️ ${proctorSnapshots.length} Violations`;
+        }
+
+        // =========================================================
+        // 2. QUESTION RENDERING & NAVIGATION
+        // =========================================================
+
+        function renderQuestion() {
+            if (isExamSubmitted) return;
+
+            const q = allQuestions[currentIndex];
+            document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${allQuestions.length}`;
+            document.getElementById("questionSubject").textContent = `${q.subject || currentSubject} • ${q.marks || 2} Marks`;
+            document.getElementById("questionText").textContent = q.text;
+
+            const optContainer = document.getElementById("optionsContainer");
+            optContainer.innerHTML = "";
+
+            const optKeys = ["A", "B", "C", "D"];
+            const options = Array.isArray(q.options) && q.options.length > 0
+                ? q.options
+                : ["Option A", "Option B", "Option C", "Option D"];
+
+            options.forEach((optText, idx) => {
+                const optKey = optKeys[idx];
+                const isSelected = userAnswers[currentIndex] === optKey;
+
+                const div = document.createElement("div");
+                div.className = `option-item ${isSelected ? "selected" : ""}`;
+                div.innerHTML = `
+                    <div class="opt-letter">${optKey}</div>
+                    <div>${SmartStore.escapeHTML(optText)}</div>
+                `;
+                div.onclick = () => selectOption(optKey);
+                optContainer.appendChild(div);
+            });
+
+            // Mark for Review state
+            const markBtn = document.getElementById("markReviewBtn");
+            if (markedForReview[currentIndex]) {
+                markBtn.className = "btn btn-purple active-mark";
+                markBtn.textContent = "✓ Marked for Review";
+            } else {
+                markBtn.className = "btn btn-purple";
+                markBtn.textContent = "⚑ Mark for Review";
+            }
+
+            // Navigation Buttons visibility
+            document.getElementById("prevBtn").style.display = currentIndex === 0 ? "none" : "block";
+            document.getElementById("nextBtn").style.display = currentIndex === allQuestions.length - 1 ? "none" : "block";
+
+            renderPalette();
+        }
+
+        function selectOption(optKey) {
+            userAnswers[currentIndex] = optKey;
+            renderQuestion();
+        }
+
+        function toggleMarkReview() {
+            if (markedForReview[currentIndex]) {
+                delete markedForReview[currentIndex];
+            } else {
+                markedForReview[currentIndex] = true;
+            }
+            renderQuestion();
+        }
+
+        function navigate(step) {
+            const nextIdx = currentIndex + step;
+            if (nextIdx >= 0 && nextIdx < allQuestions.length) {
+                currentIndex = nextIdx;
+                renderQuestion();
+            }
+        }
+
+        function jumpTo(index) {
+            if (index >= 0 && index < allQuestions.length) {
+                currentIndex = index;
+                renderQuestion();
+            }
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById("paletteGrid");
+            grid.innerHTML = "";
+            let answeredCount = 0;
+
+            allQuestions.forEach((_, idx) => {
+                const btn = document.createElement("button");
+                let statusClass = "";
+
+                if (idx === currentIndex) {
+                    statusClass = "active";
+                } else if (markedForReview[idx]) {
+                    statusClass = "marked";
+                } else if (userAnswers[idx]) {
+                    statusClass = "answered";
+                }
+
+                if (userAnswers[idx]) answeredCount++;
+
+                btn.className = `palette-btn ${statusClass}`;
+                btn.textContent = idx + 1;
+                btn.onclick = () => jumpTo(idx);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById("answeredCountBadge").textContent = `${answeredCount} / ${allQuestions.length} Answered`;
+        }
+
+        // =========================================================
+        // 3. ANTI-CHEAT PROCTORING & VIOLATION HANDLER
+        // =========================================================
+
+        /**
+         * Dedicated Multi-Person Warning Handler:
+         * Gives instant visual warnings, records evidence snapshots and violation logs,
+         * but NEVER auto-submits the test (even after 3+ warnings).
+         */
+        function showMultiPersonWarning(count, reason) {
+            if (isExamSubmitted) return;
+
+            multiPersonWarningCount++;
+            isLastViolationMultiPerson = true;
+
+            const warningMsg = reason || `Multiple persons (${count}) detected in camera view. Only 1 candidate is allowed during the exam.`;
+
+            proctorViolations.push({
+                type: "MULTI_PERSON",
+                strike: `Face Warning #${multiPersonWarningCount}`,
+                reason: warningMsg,
+                time: new Date().toLocaleTimeString()
+            });
+
+            // Capture instant violation snapshot with bounding boxes
+            captureSnapshot(`Face Warning #${multiPersonWarningCount} (${count} in Camera)`, "violation");
+
+            const modal = document.getElementById("violationModal");
+            const title = document.getElementById("violationTitle");
+            const msg = document.getElementById("violationMsg");
+            const resumeBtn = document.getElementById("resumeExamBtn");
+
+            // Update warning dots to show warning progression
+            document.getElementById("dot1").className = multiPersonWarningCount >= 1 ? "strike-dot active" : "strike-dot";
+            document.getElementById("dot2").className = multiPersonWarningCount >= 2 ? "strike-dot active" : "strike-dot";
+            document.getElementById("dot3").className = multiPersonWarningCount >= 3 ? "strike-dot active" : "strike-dot";
+
+            title.textContent = `⚠️ Security Warning: Multiple Persons Detected (Warning #${multiPersonWarningCount})`;
+            msg.textContent = `${warningMsg} Please ensure ONLY you remain in front of the camera.\n\nNote: Your exam will NOT be automatically submitted for camera face warnings, but every warning and camera snapshot is recorded for instructor review.`;
+
+            // Always allow student to acknowledge and continue - NEVER auto-submit!
+            resumeBtn.textContent = "Acknowledge & Resume";
+            resumeBtn.onclick = function () {
+                modal.style.display = "none";
+                isLastViolationMultiPerson = false;
+            };
+
+            modal.style.display = "flex";
+        }
+
+        function recordViolation(reason) {
+            if (isExamSubmitted) return;
+            isLastViolationMultiPerson = false;
+
+            proctorStrikes++;
+            updateStrikeUI();
+
+            proctorViolations.push({
+                strike: proctorStrikes,
+                reason: reason,
+                time: new Date().toLocaleTimeString()
+            });
+
+            // Capture instant violation snapshot
+            captureSnapshot(`Violation: Strike ${proctorStrikes} (${reason.slice(0, 15)})`, "violation");
+
+            const modal = document.getElementById("violationModal");
+            const title = document.getElementById("violationTitle");
+            const msg = document.getElementById("violationMsg");
+            const resumeBtn = document.getElementById("resumeExamBtn");
+
+            document.getElementById("dot1").className = proctorStrikes >= 1 ? "strike-dot active" : "strike-dot";
+            document.getElementById("dot2").className = proctorStrikes >= 2 ? "strike-dot active" : "strike-dot";
+            document.getElementById("dot3").className = proctorStrikes >= 3 ? "strike-dot active" : "strike-dot";
+
+            if (proctorStrikes >= MAX_STRIKES) {
+                title.textContent = "Examination Terminated";
+                msg.textContent = `You exceeded the maximum allowed integrity violations (${proctorStrikes}/${MAX_STRIKES}). Reason: ${reason}. Your exam will now be automatically submitted.`;
+                resumeBtn.textContent = "Proceed to Results";
+                resumeBtn.onclick = () => submitExam(true);
+                modal.style.display = "flex";
+                setTimeout(() => submitExam(true), 3500);
+            } else {
+                title.textContent = `Warning: Strike ${proctorStrikes} of ${MAX_STRIKES}`;
+                msg.textContent = `Security Violation Detected: ${reason}. Please remain focused on the exam window. On 3 strikes, your exam will be automatically cancelled.`;
+                resumeBtn.textContent = "Acknowledge & Resume";
+                resumeBtn.onclick = dismissViolation;
+                modal.style.display = "flex";
+            }
+        }
+
+        function updateStrikeUI() {
+            const badge = document.getElementById("strikeBadge");
+            badge.textContent = `Strikes: ${proctorStrikes} / ${MAX_STRIKES}`;
+            if (proctorStrikes >= 2) {
+                badge.className = "strike-badge danger";
+            }
+        }
+
+        function dismissViolation() {
+            if (isLastViolationMultiPerson) {
+                document.getElementById("violationModal").style.display = "none";
+                isLastViolationMultiPerson = false;
+                return;
+            }
+            if (proctorStrikes < MAX_STRIKES) {
+                document.getElementById("violationModal").style.display = "none";
+            } else {
+                submitExam(true);
+            }
+        }
+
+        // Tab-Switch & Blur detection
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && !isExamSubmitted) {
+                recordViolation("Tab Switch or Application Minimization");
+            }
+        });
+
+        window.addEventListener("blur", () => {
+            if (!isExamSubmitted && document.getElementById("violationModal").style.display !== "flex") {
+                recordViolation("Focus lost from exam window");
+            }
+        });
+
+        // Prevent Copy, Cut, Paste, Right-Click, and Developer Keys
+        document.addEventListener("contextmenu", (e) => e.preventDefault());
+        document.addEventListener("copy", (e) => e.preventDefault());
+        document.addEventListener("cut", (e) => e.preventDefault());
+        document.addEventListener("paste", (e) => e.preventDefault());
+
+        document.addEventListener("keydown", (e) => {
+            if (
+                e.key === "F12" ||
+                (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
+                (e.metaKey && e.altKey && (e.key === "i" || e.key === "j" || e.key === "c")) ||
+                (e.ctrlKey && e.key === "u") ||
+                (e.metaKey && e.key === "u")
+            ) {
+                e.preventDefault();
+                recordViolation("Unauthorized inspection keys");
+            }
+        });
+
+        // =========================================================
+        // 4. EXAM SUBMISSION & SCORING
+        // =========================================================
+
+        function submitExam(forced = false) {
+            if (isExamSubmitted) return;
+
+            if (!forced) {
+                const unans = allQuestions.length - Object.keys(userAnswers).length;
+                let promptMsg = "Are you sure you want to submit your examination?";
+                if (unans > 0) {
+                    promptMsg = `You have ${unans} unanswered question(s). Are you sure you want to submit?`;
+                }
+                if (!confirm(promptMsg)) return;
+            }
+
+            isExamSubmitted = true;
+            clearInterval(timerInterval);
+            if (faceMonitoringInterval) {
+                clearInterval(faceMonitoringInterval);
+            }
+
+            // Stop Webcam Stream
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+            }
+
+            let score = 0;
+            let totalMarks = 0;
+            let correctCount = 0;
+
+            const breakdown = allQuestions.map((q, idx) => {
+                const qMarks = q.marks ? parseInt(q.marks, 10) : 2;
+                totalMarks += qMarks;
+
+                const userChoice = (userAnswers[idx] || "").toString().trim().toUpperCase();
+                const correctChoice = (q.correctOption || "A").toString().trim().toUpperCase().replace("OPTION ", "");
+                const isCorrect = userChoice !== "" && userChoice === correctChoice;
+
+                if (isCorrect) {
+                    score += qMarks;
+                    correctCount++;
+                }
+
+                return {
+                    id: q.id,
+                    text: q.text,
+                    subject: q.subject || currentSubject,
+                    options: Array.isArray(q.options) && q.options.length > 0 ? q.options : ["Option A", "Option B", "Option C", "Option D"],
+                    userAnswer: userAnswers[idx] || "Not Attempted",
+                    correctAnswer: correctChoice,
+                    isCorrect: isCorrect,
+                    marks: qMarks
+                };
+            });
+
+            const percentage = totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0;
+
+            const resultRecord = {
+                studentName: currentStudent.name,
+                studentEmail: currentStudent.email,
+                examTitle: currentTitle,
+                subject: currentSubject,
+                totalQuestions: allQuestions.length,
+                correct: correctCount,
+                score: score,
+                totalMarks: totalMarks,
+                percentage: percentage,
+                proctorStrikes: proctorStrikes,
+                proctorSnapshots: proctorSnapshots,
+                violations: proctorViolations,
+                breakdown: breakdown
+            };
+
+            // Save to unified store
+            SmartStore.saveResult(resultRecord);
+
+            // Redirect to result page
+            window.location.href = "result.html";
+        }
+
+        // Timer Setup
+        let timeLeft = 15 * 60;
+        const timerInterval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Time limit expired! Your exam will now be submitted.");
+                submitExam(true);
+                return;
+            }
+
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById("timerDisplay").textContent = `⏱ ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+            if (timeLeft <= 180) { // Under 3 mins
+                document.getElementById("timerDisplay").style.background = "#fee2e2";
+                document.getElementById("timerDisplay").style.color = "#dc2626";
+            }
+
+            timeLeft--;
+        }, 1000);
+
+        // Initialize Live Webcam & Render First Question
+        initWebcam();
+        renderQuestion();
+    </script>
+</body>
+</html>

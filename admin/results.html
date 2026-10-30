@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results & Live Merit Ranking | ExamMatrix</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* Navigation Bar */
+        .admin-nav {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 14px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .brand-logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-logo span { color: var(--text-dark); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 30px auto;
+            padding: 0 24px;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* Glassmorphic Controls Bar */
+        .controls-bar {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 14px;
+            padding: 16px 22px;
+            margin-bottom: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .subject-select {
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .subject-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #ffffff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-export:hover {
+            background: linear-gradient(135deg, #047857, #059669);
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-clear {
+            background: #fee2e2;
+            color: var(--danger);
+            border: 1px solid #fca5a5;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-clear:hover {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        /* Table Card */
+        .table-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 14px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 16px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Rank Badges */
+        .rank-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .rank-1 { background: #fef08a; color: #854d0e; border: 2px solid #facc15; }
+        .rank-2 { background: #e2e8f0; color: #334155; border: 2px solid #cbd5e1; }
+        .rank-3 { background: #fed7aa; color: #9a3412; border: 2px solid #fdba74; }
+        .rank-other { background: #f1f5f9; color: #475569; }
+
+        /* Status & Proctor Badges */
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-status.passed { background: #dcfce7; color: #166534; }
+        .badge-status.failed { background: #fee2e2; color: #991b1b; }
+
+        .proctor-tag {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .proctor-clean { background: #eff6ff; color: var(--primary); }
+        .proctor-flagged { background: #fee2e2; color: #b91c1c; }
+
+        .btn-view-snapshots {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-view-snapshots:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 780px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 14px;
+            margin-bottom: 18px;
+        }
+
+        .modal-title { font-size: 18px; font-weight: 700; }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .snapshot-grid-modal {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .snap-item {
+            background: #0f172a;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .snap-item img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .snap-caption {
+            padding: 8px;
+            font-size: 11px;
+            color: #cbd5e1;
+            background: #0f172a;
+        }
+    </style>
+</head>
+<body>
+    <nav class="admin-nav">
+        <a href="dashboard.html" class="brand-logo">Exam<span>Matrix</span></a>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="questions.html">Questions</a>
+            <a href="create-exam.html">Create Exam</a>
+            <a href="exams.html">Exams</a>
+            <a href="students.html">Students</a>
+            <a href="results.html" class="active">Results</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-row">
+            <div class="header-title">
+                <h1>Results & Live Merit Ranking</h1>
+                <p>Candidate Leaderboard sorted with <strong>QuickSort</strong>, featuring proctoring photo audit inspection.</p>
+            </div>
+        </div>
+
+        <!-- UI Controls Bar: Filter by Subject, Download Excel, Reset -->
+        <div class="controls-bar">
+            <div class="controls-left">
+                <label for="subjectFilter" class="filter-label">🎯 Filter by Subject:</label>
+                <select id="subjectFilter" class="subject-select" onchange="filterBySubject()">
+                    <option value="All">All Subjects</option>
+                    <option value="DSA">DSA</option>
+                    <option value="Java">Java</option>
+                    <option value="C Programming">C Programming</option>
+                    <option value="DBMS">DBMS</option>
+                    <option value="Aptitude">Aptitude</option>
+                </select>
+            </div>
+            <div class="controls-right">
+                <button class="btn-export" onclick="exportToExcel()" title="Export filtered rows to CSV/Excel">
+                    📊 Download Excel
+                </button>
+                <button class="btn-clear" onclick="resetMeritList()">Reset Merit List</button>
+            </div>
+        </div>
+        
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Rank</th>
+                        <th>Student Name & Email</th>
+                        <th>Examination Title</th>
+                        <th>Score Obtained</th>
+                        <th>Accuracy</th>
+                        <th>Status</th>
+                        <th>Proctoring Audit</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Interactive Proctor Snapshot Audit Modal -->
+    <div class="modal-overlay" id="snapshotModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="modalStudentName">Proctoring Audit Log</div>
+                    <div style="font-size:12px; color:var(--text-muted);" id="modalExamTitle">Candidate Camera Timeline</div>
+                </div>
+                <button class="btn-close" onclick="closeSnapshotModal()">&times;</button>
+            </div>
+            <div id="modalSnapshotsContent"></div>
+        </div>
+    </div>
+
+    <!-- Store Script -->
+    <script src="../js/store.js"></script>
+
+    <script>
+        "use strict";
+
+        let currentLeaderboard = [];
+
+        function renderLeaderboard() {
+            const rawResults = SmartStore.getResults();
+            currentLeaderboard = SmartStore.quickSort(rawResults, "score", true);
+
+            const tbody = document.getElementById("rankingTable");
+            tbody.innerHTML = "";
+
+            if (currentLeaderboard.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 36px;">No examination submissions recorded yet.</td></tr>`;
+                return;
+            }
+
+            currentLeaderboard.forEach((res, index) => {
+                const rank = index + 1;
+                let rankClass = "rank-other";
+                if (rank === 1) rankClass = "rank-1";
+                else if (rank === 2) rankClass = "rank-2";
+                else if (rank === 3) rankClass = "rank-3";
+
+                const passed = res.status === "Passed" || res.percentage >= 40;
+                const strikes = res.proctorStrikes || 0;
+                const snapshotCount = (res.proctorSnapshots || []).length;
+
+                const proctorHtml = strikes === 0
+                    ? `<span class="proctor-tag proctor-clean">✓ Verified (0 Strikes)</span>`
+                    : `<span class="proctor-tag proctor-flagged">⚠️ Flagged (${strikes} Strikes)</span>`;
+
+                tbody.innerHTML += `
+                    <tr data-subject="${SmartStore.escapeHTML(res.subject || '')}">
+                        <td>
+                            <div class="rank-badge ${rankClass}">#${rank}</div>
+                        </td>
+                        <td>
+                            <strong>${SmartStore.escapeHTML(res.studentName)}</strong>
+                            <div style="font-size: 12px; color: var(--text-muted);">${SmartStore.escapeHTML(res.studentEmail || '')}</div>
+                        </td>
+                        <td>
+                            <strong>${SmartStore.escapeHTML(res.examTitle)}</strong>
+                            <div style="font-size: 12px; color: var(--primary);">${SmartStore.escapeHTML(res.subject || 'General')}</div>
+                        </td>
+                        <td>
+                            <strong>${res.score}</strong> / ${res.totalMarks}
+                        </td>
+                        <td>
+                            <strong>${res.percentage}%</strong>
+                        </td>
+                        <td>
+                            <span class="badge-status ${passed ? 'passed' : 'failed'}">${passed ? 'PASSED' : 'FAILED'}</span>
+                        </td>
+                        <td>
+                            ${proctorHtml}
+                        </td>
+                        <td>
+                            <button class="btn-view-snapshots" onclick="openSnapshotModal('${res.id}')">
+                                ⚠️ View Violations (${snapshotCount})
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Re-apply filter if user already selected a specific subject
+            filterBySubject();
+        }
+
+        /**
+         * Real-time Filtering: Filters table rows dynamically based on the selected subject.
+         * Checks the 'Examination Title' column for the subject name. If 'All Subjects' is selected, shows all rows.
+         */
+        function filterBySubject() {
+            const selectEl = document.getElementById("subjectFilter");
+            const selectedSubject = selectEl ? selectEl.value : "All";
+            const rows = document.querySelectorAll("#rankingTable tr");
+
+            if (rows.length === 0) return;
+
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                // If it's the empty placeholder row, skip
+                if (row.cells.length < 5) return;
+
+                if (selectedSubject === "All" || selectedSubject === "All Subjects") {
+                    row.style.display = "";
+                    visibleCount++;
+                } else {
+                    // Check Examination Title column (column index 2, 0-indexed)
+                    const examTitleText = row.cells[2] ? row.cells[2].textContent.toLowerCase() : "";
+                    const subjectAttr = (row.getAttribute("data-subject") || "").toLowerCase();
+                    const filterLower = selectedSubject.toLowerCase();
+
+                    let matches = false;
+                    if (filterLower === "c programming") {
+                        matches = examTitleText.includes("c programming") || 
+                                  examTitleText.includes("pointers") || 
+                                  subjectAttr === "c" || 
+                                  subjectAttr === "c programming" ||
+                                  examTitleText.includes(" c ");
+                    } else {
+                        matches = examTitleText.includes(filterLower) || subjectAttr.includes(filterLower);
+                    }
+
+                    if (matches) {
+                        row.style.display = "";
+                        visibleCount++;
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+        }
+
+        /**
+         * Export to CSV/Excel: Downloads ONLY currently visible (filtered) rows into a CSV file.
+         * Excludes the last 'Actions' column from the export.
+         * Dynamic filename: ExamMatrix_{Subject}_Results.csv (e.g. ExamMatrix_DSA_Results.csv or ExamMatrix_ALL_Results.csv)
+         */
+        function exportToExcel() {
+            const selectEl = document.getElementById("subjectFilter");
+            const selectedVal = selectEl ? selectEl.value : "All";
+
+            let subjectTag = "ALL";
+            if (selectedVal && selectedVal !== "All" && selectedVal !== "All Subjects") {
+                subjectTag = selectedVal.replace(/\s+/g, "_");
+            }
+            const fileName = `ExamMatrix_${subjectTag}_Results.csv`;
+
+            const rows = document.querySelectorAll("#rankingTable tr");
+            const visibleData = [];
+
+            // Exclude last 'Actions' column from headers
+            const headers = [
+                "Rank",
+                "Student Name",
+                "Student Email",
+                "Examination Title",
+                "Score Obtained",
+                "Accuracy",
+                "Status"
+            ];
+
+            rows.forEach(row => {
+                // Process only visible rows with actual candidate data
+                if (row.style.display === "none" || row.cells.length < 6) return;
+
+                const rank = row.cells[0] ? row.cells[0].textContent.trim().replace("#", "") : "";
+                
+                // Student Name & Email extraction
+                let studentName = "";
+                let studentEmail = "";
+                if (row.cells[1]) {
+                    const nameStrong = row.cells[1].querySelector("strong");
+                    const emailDiv = row.cells[1].querySelector("div");
+                    studentName = nameStrong ? nameStrong.textContent.trim() : row.cells[1].textContent.trim();
+                    studentEmail = emailDiv ? emailDiv.textContent.trim() : "";
+                }
+
+                // Examination Title
+                let examTitle = "";
+                if (row.cells[2]) {
+                    const examStrong = row.cells[2].querySelector("strong");
+                    examTitle = examStrong ? examStrong.textContent.trim() : row.cells[2].textContent.trim();
+                }
+
+                // Score Obtained
+                const score = row.cells[3] ? row.cells[3].textContent.trim().replace(/\s+/g, " ") : "";
+
+                // Accuracy
+                const accuracy = row.cells[4] ? row.cells[4].textContent.trim() : "";
+
+                // Status
+                const status = row.cells[5] ? row.cells[5].textContent.trim() : "";
+
+                visibleData.push([
+                    rank,
+                    studentName,
+                    studentEmail,
+                    examTitle,
+                    score,
+                    accuracy,
+                    status
+                ]);
+            });
+
+            if (visibleData.length === 0) {
+                alert("No visible records to export for the selected subject filter.");
+                return;
+            }
+
+            // Construct CSV string
+            let csvContent = "\uFEFF"; // UTF-8 BOM for Excel compatibility
+            csvContent += headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",") + "\r\n";
+
+            visibleData.forEach(rowArr => {
+                csvContent += rowArr.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",") + "\r\n";
+            });
+
+            // Trigger file download
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", fileName);
+            link.style.visibility = "hidden";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function openSnapshotModal(resultId) {
+            const res = currentLeaderboard.find(r => r.id === resultId);
+            if (!res) return;
+
+            document.getElementById("modalStudentName").textContent = `Security Violation Audits: ${res.studentName}`;
+            document.getElementById("modalExamTitle").textContent = `${res.examTitle} • Total ${res.proctorStrikes} Strike(s) Recorded`;
+
+            const content = document.getElementById("modalSnapshotsContent");
+            const snapshots = res.proctorSnapshots || [];
+
+            if (snapshots.length === 0) {
+                content.innerHTML = `<div style="padding: 28px; text-align: center; color: #166534; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">✓ Clean Examination: No integrity violation snapshots recorded for this candidate.</div>`;
+            } else {
+                let html = `<div class="snapshot-grid-modal">`;
+                snapshots.forEach(s => {
+                    const isViolation = s.type === "violation" || (s.label || "").toLowerCase().includes("violation");
+                    const imgSrc = s.image || s.dataUrl || "";
+                    
+                    let visual = "";
+                    if (imgSrc && imgSrc.startsWith("data:image")) {
+                        visual = `<img src="${imgSrc}" alt="Proctor Snapshot" />`;
+                    } else {
+                        visual = `
+                            <div style="height:140px; background:#1e293b; display:flex; align-items:center; justify-content:center; flex-direction:column; color:${isViolation ? '#ef4444' : '#38bdf8'}; font-size:12px; gap:6px;">
+                                <span style="font-size:26px;">👤</span>
+                                <span>${SmartStore.escapeHTML(s.label || 'Snapshot')}</span>
+                            </div>
+                        `;
+                    }
+
+                    html += `
+                        <div class="snap-item">
+                            ${visual}
+                            <div class="snap-caption">
+                                <div style="color:${isViolation ? '#f87171' : '#38bdf8'}; font-weight:700;">
+                                    ${isViolation ? '⚠️ ' : '📸 '} ${SmartStore.escapeHTML(s.label || 'Periodic')}
+                                </div>
+                                <div style="color:#94a3b8; font-size:10px; margin-top:2px;">${s.timestamp || ''}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                content.innerHTML = html;
+            }
+
+            document.getElementById("snapshotModal").style.display = "flex";
+        }
+
+        function closeSnapshotModal() {
+            document.getElementById("snapshotModal").style.display = "none";
+        }
+
+        // Close on background click
+        document.getElementById("snapshotModal").addEventListener("click", function(e) {
+            if (e.target === this) closeSnapshotModal();
+        });
+
+        function resetMeritList() {
+            if (confirm("Are you sure you want to reset all test submissions?")) {
+                SmartStore.clearResults();
+                renderLeaderboard();
+            }
+        }
+
+        renderLeaderboard();
+    </script>
+</body>
+</html>

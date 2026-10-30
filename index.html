@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartExam | Next-Gen DSA Online Examination System</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --accent: #3b82f6;
+            --navy-dark: #090d16;
+            --navy-surface: #0f172a;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --card-bg: #ffffff;
+            --success: #10b981;
+            --purple: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Ambient Hero Glow */
+        .bg-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100vw;
+            height: 650px;
+            background: radial-gradient(circle at 50% 10%, rgba(37, 99, 235, 0.12) 0%, rgba(59, 130, 246, 0.05) 40%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Glassmorphic Sticky Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            z-index: 100;
+        }
+
+        .navbar {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--navy-dark);
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        }
+
+        .brand-logo span {
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-nav-student {
+            text-decoration: none;
+            color: var(--navy-dark);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 9px 18px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .btn-nav-student:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-nav-admin {
+            text-decoration: none;
+            background: var(--navy-dark);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 9px 18px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+        }
+
+        .btn-nav-admin:hover {
+            background: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 70px 24px 80px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eff6ff;
+            color: var(--primary);
+            border: 1px solid #dbeafe;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .hero-badge .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+            animation: pulse 2s infinite;
+        }
+
+        .hero-title {
+            font-size: 54px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.15;
+            color: var(--navy-dark);
+            max-width: 860px;
+            margin-bottom: 20px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 650px;
+            line-height: 1.6;
+            margin-bottom: 36px;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 60px;
+        }
+
+        .btn-hero-primary {
+            background: var(--primary);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 14px 28px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.35);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-hero-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.45);
+        }
+
+        .btn-hero-secondary {
+            background: #ffffff;
+            color: var(--navy-dark);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 14px 24px;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            transition: all 0.2s ease;
+        }
+
+        .btn-hero-secondary:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        /* Hero Preview Card Mockup */
+        .hero-preview {
+            width: 100%;
+            max-width: 950px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+        }
+
+        .preview-mini-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-light);
+            padding: 18px;
+            border-radius: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .preview-mini-card:hover {
+            transform: translateY(-3px);
+            background: #ffffff;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+        }
+
+        .preview-mini-card .mini-tag {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .preview-mini-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: 6px;
+        }
+
+        .preview-mini-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Features Section */
+        .section-wrapper {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 90px 24px;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 55px;
+        }
+
+        .section-tag {
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .section-header h2 {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            color: var(--navy-dark);
+            margin-bottom: 12px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-box {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
+            padding: 32px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .feature-box:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.06);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .icon-blue { background: #eff6ff; color: var(--primary); }
+        .icon-green { background: #ecfdf5; color: var(--success); }
+        .icon-purple { background: #f5f3ff; color: var(--purple); }
+        .icon-amber { background: #fffbeb; color: #d97706; }
+
+        .feature-box h3 {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: 10px;
+        }
+
+        .feature-box p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .dsa-badge {
+            display: inline-block;
+            margin-top: 14px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        /* Dual Portal Section */
+        .portal-split-section {
+            background: #f8fafc;
+            border-top: 1px solid var(--border-light);
+            border-bottom: 1px solid var(--border-light);
+            padding: 90px 24px;
+        }
+
+        .portal-grid {
+            max-width: 1240px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .portal-card {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+        }
+
+        .portal-card:hover {
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+            transform: translateY(-3px);
+        }
+
+        .portal-card.dark {
+            background: var(--navy-surface);
+            color: #ffffff;
+            border-color: #1e293b;
+        }
+
+        .portal-card.dark h3 {
+            color: #ffffff;
+        }
+
+        .portal-card.dark p {
+            color: #94a3b8;
+        }
+
+        .portal-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .portal-card p {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .portal-checklist {
+            list-style: none;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .portal-checklist li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .check-dot {
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .portal-card.dark .check-dot {
+            color: #60a5fa;
+        }
+
+        .btn-portal {
+            display: inline-block;
+            text-align: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-portal-blue {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-portal-blue:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-portal-white {
+            background: #ffffff;
+            color: var(--navy-dark);
+        }
+
+        .btn-portal-white:hover {
+            background: #f1f5f9;
+        }
+
+        /* Footer */
+        footer {
+            background: #ffffff;
+            padding: 60px 24px 30px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .footer-inner {
+            max-width: 1240px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .footer-bottom {
+            max-width: 1240px;
+            margin: 25px auto 0;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
+            70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .hero-title { font-size: 38px; }
+            .hero-preview { grid-template-columns: 1fr; }
+            .portal-grid { grid-template-columns: 1fr; }
+            .nav-menu { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow"></div>
+
+    <!-- Header / Navbar -->
+    <header>
+        <div class="navbar">
+            <a href="index.html" class="brand-logo">
+                <div class="logo-icon">E</div>
+                Exam Matrix<span></span>
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#portals">Portals</a></li>
+                <li><a href="#about">Architecture</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="student/login.html" class="btn-nav-student">Student Login</a>
+                <a href="admin/login.html" class="btn-nav-admin">Admin Portal →</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-badge">
+            <div class="pulse-dot"></div>
+            DSA Powered Examination Engine
+        </div>
+
+        <h1 class="hero-title">
+             ExamMatrix  <br>
+            <span class="gradient-text">Online Examination Portal</span>
+        </h1>
+
+        <p class="hero-subtitle">
+            An academic examination management system implementing real-world Data Structures: Linked Lists, Stacks, Priority Queues, and QuickSort ranking.
+        </p>
+
+        <div class="hero-cta-group">
+            <a href="student/login.html" class="btn-hero-primary">
+                Take Online Exam <span>→</span>
+            </a>
+            <a href="admin/login.html" class="btn-hero-secondary">
+                Teacher / Admin Access
+            </a>
+        </div>
+
+        <!-- 3-Pillar Highlight Cards -->
+        <div class="hero-preview">
+            <div class="preview-mini-card">
+                <div class="mini-tag">Stack & Queue</div>
+                <h3>Question Palette</h3>
+                <p>Track answered, skipped, and marked questions with real-time state management.</p>
+            </div>
+            <div class="preview-mini-card">
+                <div class="mini-tag">Synchronized Bank</div>
+                <h3>Live Question Sync</h3>
+                <p>Questions published by teachers appear instantly in the candidate's test room.</p>
+            </div>
+            <div class="preview-mini-card">
+                <div class="mini-tag">QuickSort Ranking</div>
+                <h3>Automated Merit List</h3>
+                <p>Instant scoring, accuracy analysis, and dynamic leaderboard sorting.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section-wrapper" id="features">
+        <div class="section-header">
+            <span class="section-tag">Core Capabilities</span>
+            <h2>Engineered with Core DSA Logic</h2>
+            <p>Practical integration of algorithmic efficiency and clean user interface design.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-box">
+                <div class="feature-icon-wrapper icon-blue">⏱️</div>
+                <h3>Smart Reverse Timer</h3>
+                <p>Automatic countdown and auto-submission safeguards ensure precise exam timings.</p>
+                <span class="dsa-badge">State Management</span>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon-wrapper icon-green">📚</div>
+                <h3>Central Question Bank</h3>
+                <p>Categorized MCQs filtered by Subject, Difficulty (Easy/Medium/Hard), and Marks.</p>
+                <span class="dsa-badge">Linked List & Hashing</span>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon-wrapper icon-purple">🏆</div>
+                <h3>Instant Scorecard & Merit</h3>
+                <p>Get immediate answer breakdown with verified correct keys and candidate accuracy.</p>
+                <span class="dsa-badge">QuickSort Algorithm</span>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon-wrapper icon-amber">🛡️</div>
+                <h3>Secure Authentication</h3>
+                <p>Role-based access separation between Candidates and Examination Administrators.</p>
+                <span class="dsa-badge">Session Control</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dual Portal Showcase Section -->
+    <section class="portal-split-section" id="portals">
+        <div class="portal-grid">
+            
+            <!-- Student Portal Card -->
+            <div class="portal-card">
+                <div>
+                    <span class="section-tag">For Candidates</span>
+                    <h3>Student Portal</h3>
+                    <p>Access categorized mock tests, practice DSA algorithms, and receive immediate results.</p>
+
+                    <ul class="portal-checklist">
+                        <li><span class="check-dot">✓</span> Chapter-wise mock examinations</li>
+                        <li><span class="check-dot">✓</span> Interactive question navigation palette</li>
+                        <li><span class="check-dot">✓</span> Detailed scorecard with correct answers key</li>
+                    </ul>
+                </div>
+                <a href="student/login.html" class="btn-portal btn-portal-blue">Student Login Portal →</a>
+            </div>
+
+            <!-- Admin Portal Card (Dark Theme) -->
+            <div class="portal-card dark">
+                <div>
+                    <span class="section-tag" style="color:#60a5fa;">For Teachers / Admins</span>
+                    <h3>Admin Management</h3>
+                    <p>Full control over question bank creation, scheduling exams, and reviewing merit rankings.</p>
+
+                    <ul class="portal-checklist">
+                        <li><span class="check-dot">✓</span> Add, edit & delete MCQs dynamically</li>
+                        <li><span class="check-dot">✓</span> Schedule & toggle exam availability</li>
+                        <li><span class="check-dot">✓</span> Real-time student performance leaderboard</li>
+                    </ul>
+                </div>
+                <a href="admin/login.html" class="btn-portal btn-portal-white">Admin Dashboard Login →</a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="about">
+        <div class="footer-inner">
+            <div class="brand-logo">
+                <div class="logo-icon">E</div>
+                Exam Matrix<span></span>
+            </div>
+
+            <div style="font-size: 14px; color: var(--text-muted);">
+                Data Structures & Algorithms Mini Project &bull; Academic Year 2026
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            &copy; 2026 ExamMatrix System. All rights reserved.
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | SmartExam</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .nav-links-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .nav-link-item {
+            color: #475569;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .nav-link-item:hover {
+            color: #2563eb;
+            background: #eff6ff;
+        }
+        .quick-banner {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #ffffff;
+            border-radius: 14px;
+            padding: 24px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1);
+        }
+        .quick-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .quick-banner p { color: #94a3b8; font-size: 14px; }
+        .btn-view-perf {
+            background: #2563eb;
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .btn-view-perf:hover { background: #1d4ed8; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">Smart<span>Exam</span></div>
+        <div class="nav-links-right">
+            <a href="dashboard.html" class="nav-link-item" style="color: #2563eb;">Dashboard</a>
+            <a href="performance.html" class="nav-link-item">My Performance 📊</a>
+            <div class="nav-user">
+                <span id="welcomeUser">Welcome, Student</span>
+                <button id="logoutBtn" class="btn-logout" onclick="SmartStore.logoutStudent()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="quick-banner">
+            <div>
+                <h2>Ready for your next assessment?</h2>
+                <p>Select a subject track below to practice and benchmark your score with live proctoring.</p>
+            </div>
+            <a href="performance.html" class="btn-view-perf">View My Performance & Rank →</a>
+        </div>
+
+        <div class="dashboard-header">
+            <h1>Subject Examination Categories</h1>
+            <p>Select your subject to start subject-wise diagnostic tests and live online examinations.</p>
+        </div>
+
+        <div class="category-grid">
+            
+            <!-- Category 1: DSA -->
+            <div class="category-card">
+                <h2 class="card-title">Data Structures & Algorithms</h2>
+                <ul class="topic-list">
+                    <li><a href="instructions.html?subject=DSA&title=DSA%20Stack%20%26%20Queue">› Stack & Queue Operations</a></li>
+                    <li><a href="instructions.html?subject=DSA&title=DSA%20Linked%20List">› Trees, Graphs & Linked Lists</a></li>
+                    <li><a href="instructions.html?subject=DSA&title=DSA%20Full%20Test" class="highlight-link">› DSA Subject Test (All DSA)</a></li>
+                </ul>
+            </div>
+
+            <!-- Category 2: Java Programming -->
+            <div class="category-card">
+                <h2 class="card-title">Java Programming</h2>
+                <ul class="topic-list">
+                    <li><a href="instructions.html?subject=Java&title=Java%20Core%20%26%20OOPs">› Java Core & OOPs</a></li>
+                    <li><a href="instructions.html?subject=Java&title=Java%20Exceptions%20%26%20Threads">› Exception Handling & Multithreading</a></li>
+                    <li><a href="instructions.html?subject=Java&title=Java%20Complete%20Test" class="highlight-link">› Java Full Subject Test</a></li>
+                </ul>
+            </div>
+
+            <!-- Category 3: DBMS & SQL -->
+            <div class="category-card">
+                <h2 class="card-title">Database Management (DBMS)</h2>
+                <ul class="topic-list">
+                    <li><a href="instructions.html?subject=DBMS&title=SQL%20Queries%20%26%20Joins">› SQL Queries, ACID & Joins</a></li>
+                    <li><a href="instructions.html?subject=DBMS&title=DBMS%20Normalization">› Normalization & Indexing (B+ Trees)</a></li>
+                    <li><a href="instructions.html?subject=DBMS&title=DBMS%20Full%20Test" class="highlight-link">› DBMS Subject Test</a></li>
+                </ul>
+            </div>
+
+            <!-- Category 4: C Programming -->
+            <div class="category-card">
+                <h2 class="card-title">C Programming</h2>
+                <ul class="topic-list">
+                    <li><a href="instructions.html?subject=C&title=C%20Pointers%20%26%20Memory">› Pointers & Dynamic Memory</a></li>
+                    <li><a href="instructions.html?subject=C&title=C%20Programming%20Test" class="highlight-link">› C Programming Full Test</a></li>
+                </ul>
+            </div>
+
+            <!-- Category 5: General Aptitude -->
+            <div class="category-card">
+                <h2 class="card-title">General Aptitude</h2>
+                <ul class="topic-list">
+                    <li><a href="instructions.html?subject=Aptitude&title=Logical%20Reasoning">› Quantitative & Logical Reasoning</a></li>
+                    <li><a href="instructions.html?subject=Aptitude&title=Aptitude%20Full%20Test" class="highlight-link">› Aptitude Mock Test</a></li>
+                </ul>
+            </div>
+
+            <!-- Category 6: Full Mock Exam (All Subjects) -->
+            <div class="category-card">
+                <h2 class="card-title">Comprehensive Mock Exam</h2>
+                <ul class="topic-list">
+                    <li><a href="instructions.html?subject=All&title=Full%20Syllabus%20Mock%20Exam" class="highlight-link">› Complete Mock Test (All Subjects Combined)</a></li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Store Script -->
+    <script src="../js/store.js"></script>
+
+    <script>
+        const student = SmartStore.getCurrentStudent();
+        if (student && student.name) {
+            document.getElementById("welcomeUser").textContent = "Welcome, " + student.name;
+        }
+    </script>
+</body>
+</html>

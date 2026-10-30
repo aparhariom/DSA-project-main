@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Question | SmartExam</title>
+    <style>
+        :root {
+            --primary: #2563eb; --primary-hover: #1d4ed8; --bg: #f8fafc;
+            --text-dark: #0f172a; --text-muted: #64748b; --border: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text-dark); min-height: 100vh; }
+        .admin-nav { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .brand-logo { font-size: 20px; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .brand-logo span { color: var(--text-dark); }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; margin-left: 20px; }
+        .nav-links a.active { color: var(--primary); font-weight: 600; }
+        .container { max-width: 860px; margin: 35px auto; padding: 0 20px; }
+        .form-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 36px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group.full { grid-column: span 2; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+        .form-control { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; background: #fff; }
+        .form-control:focus { border-color: var(--primary); }
+        textarea.form-control { resize: vertical; min-height: 85px; }
+        .btn-row { display: flex; gap: 12px; margin-top: 20px; }
+        .btn-submit { flex: 1; background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .btn-submit:hover { background: var(--primary-hover); }
+        .btn-cancel { background: #f1f5f9; color: var(--text-dark); text-decoration: none; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; border: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+    <nav class="admin-nav">
+        <a href="dashboard.html" class="brand-logo">Smart<span>Exam</span></a>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="questions.html" class="active">Questions</a>
+            <a href="create-exam.html">Create Exam</a>
+            <a href="exams.html">Exams</a>
+            <a href="students.html">Students</a>
+            <a href="results.html">Results</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="form-card">
+            <h1 style="font-size: 22px; font-weight: 700;">Add New Question</h1>
+            <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Assign question to a specific subject category and question bank.</p>
+
+            <form id="addQuestionForm">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label for="qText">Question Description *</label>
+                        <textarea id="qText" class="form-control" placeholder="Enter the complete question text..." required></textarea>
+                    </div>
+
+                    <!-- Dedicated Subject Categories -->
+                    <div class="form-group">
+                        <label for="qSubject">Subject Category *</label>
+                        <select id="qSubject" class="form-control" required>
+                            <option value="DSA">Data Structures & Algorithms (DSA)</option>
+                            <option value="Java">Java Programming</option>
+                            <option value="DBMS">Database Management (DBMS)</option>
+                            <option value="C">C Programming</option>
+                            <option value="Aptitude">General Aptitude</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qDifficulty">Difficulty Level *</label>
+                        <select id="qDifficulty" class="form-control" required>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="optA">Option A *</label>
+                        <input type="text" id="optA" class="form-control" placeholder="Option A text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="optB">Option B *</label>
+                        <input type="text" id="optB" class="form-control" placeholder="Option B text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="optC">Option C *</label>
+                        <input type="text" id="optC" class="form-control" placeholder="Option C text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="optD">Option D *</label>
+                        <input type="text" id="optD" class="form-control" placeholder="Option D text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="correctOpt">Correct Option *</label>
+                        <select id="correctOpt" class="form-control" required>
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qMarks">Marks Assigned *</label>
+                        <input type="number" id="qMarks" class="form-control" value="2" min="1" max="10" required>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button type="submit" class="btn-submit">Save Question to Bank →</button>
+                    <a href="questions.html" class="btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Store Script -->
+    <script src="../js/store.js"></script>
+
+    <script>
+        document.getElementById("addQuestionForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const newQuestion = {
+                text: document.getElementById("qText").value.trim(),
+                subject: document.getElementById("qSubject").value,
+                difficulty: document.getElementById("qDifficulty").value,
+                options: [
+                    document.getElementById("optA").value.trim(),
+                    document.getElementById("optB").value.trim(),
+                    document.getElementById("optC").value.trim(),
+                    document.getElementById("optD").value.trim()
+                ],
+                correctOption: document.getElementById("correctOpt").value,
+                marks: parseInt(document.getElementById("qMarks").value, 10) || 2
+            };
+
+            const saved = SmartStore.addQuestion(newQuestion);
+
+            alert(`Question #${saved.id} added successfully under ${saved.subject}!`);
+            window.location.href = "questions.html";
+        });
+    </script>
+</body>
+</html>
